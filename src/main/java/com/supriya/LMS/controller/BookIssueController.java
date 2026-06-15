@@ -14,14 +14,12 @@ public class BookIssueController {
 
     private final BookIssueService bookIssueService;
 
-    public BookIssueController(BookIssueService bookIssueService)
-    {
+    public BookIssueController(BookIssueService bookIssueService) {
         this.bookIssueService = bookIssueService;
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BookIssueDto>> issueBook(@RequestParam Long bookId, @RequestParam Long memberId)
-    {
+    public ResponseEntity<ApiResponse<BookIssueDto>> issueBook(@RequestParam Long bookId, @RequestParam Long memberId) {
         return ResponseEntity.ok(new ApiResponse<>(
                         "200",
                         "Book Issued Successfully",
@@ -37,8 +35,7 @@ public class BookIssueController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookIssueDto>> getIssueById(@PathVariable Long id)
-    {
+    public ResponseEntity<ApiResponse<BookIssueDto>> getIssueById(@PathVariable Long id) {
         return ResponseEntity.ok(new ApiResponse<>(
                         "200",
                         "Issue Record Found",
@@ -46,8 +43,7 @@ public class BookIssueController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<BookIssueDto>>> getActiveIssues()
-    {
+    public ResponseEntity<ApiResponse<List<BookIssueDto>>> getActiveIssues() {
         return ResponseEntity.ok(new ApiResponse<>(
                         "200",
                         "Active Issues Retrieved",
@@ -55,11 +51,17 @@ public class BookIssueController {
     }
 
     @PutMapping("/{issueId}")
-    public ResponseEntity<ApiResponse<BookIssueDto>> returnBook(@PathVariable Long issueId)
-    {
+    public ResponseEntity<ApiResponse<BookIssueDto>> returnBook(@PathVariable Long issueId) {
         return ResponseEntity.ok(new ApiResponse<>(
                         "200",
                         "Book Returned Successfully",
                         bookIssueService.returnBook(issueId)));
+    }
+
+    @GetMapping("/member/{memberId}")
+    public ResponseEntity<ApiResponse<List<BookIssueDto>>> getMemberIssuedBooks(@PathVariable Long memberId) {
+        return ResponseEntity.ok(new ApiResponse<>(
+                "200", "Member Issues Retrieved",
+                bookIssueService.getMemberIssuedBooks(memberId)));
     }
 }
