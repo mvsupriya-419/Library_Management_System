@@ -11,4 +11,9 @@ public interface BookIssueService {
     BookIssue getBookIssueById(Long id);
 
     List<BookIssue> getAllIssuedBooks();
+
+    List<BookIssue> getActiveIssues();
+
+
+    BookIssue returnBook(Long issueId);
 }

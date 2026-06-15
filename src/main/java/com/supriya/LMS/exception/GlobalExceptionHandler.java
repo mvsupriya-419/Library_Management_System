@@ -1,5 +1,6 @@
-package com.supriya.LMS.Exception;
+package com.supriya.LMS.exception;
 
+import com.supriya.LMS.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,17 +14,12 @@ import java.util.Objects;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest httpServletRequest)
-    {
-        ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setTimeStamp(LocalDate.now());
-        errorResponse.setStatus(ex.getStatusCode().value());
-        errorResponse.setMessage("Fields are empty.");
-        errorResponse.setError(Objects.requireNonNull(ex.getFieldError()).getDefaultMessage());
-        errorResponse.setPath(httpServletRequest.getRequestURI());
+    @ExceptionHandler(BookNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>>
+    handleBookNotFound(BookNotFoundException ex){
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ApiResponse<>("404", ex.getMessage(), null));
     }
 
 }

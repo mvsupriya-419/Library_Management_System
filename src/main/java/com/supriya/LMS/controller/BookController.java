@@ -4,9 +4,11 @@ package com.supriya.LMS.controller;
 import com.supriya.LMS.Entity.Book;
 import com.supriya.LMS.service.BookService;
 import com.supriya.LMS.service.BookServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -21,7 +23,7 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<Book> createBook(@RequestBody Book book) {
+    public ResponseEntity<Book> createBook(@Valid @RequestBody Book book) {
         return ResponseEntity.ok(bookService.createBook(book));
     }
 
@@ -31,7 +33,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
+    public ResponseEntity<Book> getBookById(@Valid @PathVariable Long id) {
         return ResponseEntity.ok(bookService.getBookById(id));
     }
 

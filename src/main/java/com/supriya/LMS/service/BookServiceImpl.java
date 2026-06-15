@@ -1,6 +1,7 @@
 package com.supriya.LMS.service;
 
 import com.supriya.LMS.Entity.Book;
+import com.supriya.LMS.exception.BookNotFoundException;
 import com.supriya.LMS.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book createBook(Book book) {
+        if(bookRepository.existsByIsbn(book.getIsbn())){
+            throw new RuntimeException("ISBN already exists");
+        }
         return bookRepository.save(book);
 
     }
@@ -30,4 +34,24 @@ public class BookServiceImpl implements BookService {
 
         return  bookRepository.findAll();
     }
+
+    @Override
+    public Book updateBook(Long id, Book book) {
+
+        Book existing = bookRepository.findById(id).orElseThrow(() ->
+                new BookNotFoundException("Book Not Found"));
+        existing.setTitle(book.getTitle());
+        existing.setAuthor(book.getAuthor());
+        existing.setCategory(book.getCategory());
+        return bookRepository.save(existing);
+    }
+
+    @Override
+    public void deleteBook(Long id) {
+        Book book = bookRepository.findById(id).orElseThrow(() ->
+                new BookNotFoundException("Book Not Found"));
+        bookRepository.delete(book);
+    }
+
+
 }

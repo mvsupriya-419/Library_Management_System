@@ -3,6 +3,7 @@ package com.supriya.LMS.service;
 import com.supriya.LMS.Entity.Book;
 import com.supriya.LMS.Entity.BookIssue;
 import com.supriya.LMS.Entity.Member;
+import com.supriya.LMS.exception.IssueRecordNotFoundException;
 import com.supriya.LMS.repository.BookIssueRepository;
 import com.supriya.LMS.repository.BookRepository;
 import com.supriya.LMS.repository.MemberRepository;
@@ -57,13 +58,37 @@ public class BookIssueServiceImpl implements BookIssueService {
     @Override
     public BookIssue getBookIssueById(Long id) {
 
-        return bookIssueRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Issue record not found"));
+        return bookIssueRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("Issue record not found"));
     }
 
     @Override
     public List<BookIssue> getAllIssuedBooks() {
         return bookIssueRepository.findAll();
+    }
+
+    @Override
+    public List<BookIssue> getActiveIssues() {
+
+        return bookIssueRepository
+                .findByStatus("ISSUED");
+    }
+
+    @Override
+    public BookIssue returnBook(Long issueId) {
+
+        BookIssue issue = bookIssueRepository.findById(issueId).orElseThrow(() ->
+                new IssueRecordNotFoundException("Issue Not Found"));
+
+        if ("RETURNED".equalsIgnoreCase(issue.getStatus())) {
+            return issue;
+        }
+
+        issue.setStatus("RETURNED");
+        issue.setReturnDate(LocalDate.now());
+        Book book = issue.getBook();
+        book.setAvailableCopies(book.getAvailableCopies() + 1);
+        bookRepository.save(book);
+        return bookIssueRepository.save(issue);
     }
 }

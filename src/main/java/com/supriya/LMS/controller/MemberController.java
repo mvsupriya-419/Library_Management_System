@@ -2,6 +2,7 @@ package com.supriya.LMS.controller;
 
 import com.supriya.LMS.Entity.Member;
 import com.supriya.LMS.service.MemberService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class MemberController {
     }
 
     @PostMapping
-    public ResponseEntity<Member> createMember(@RequestBody Member member) {
+    public ResponseEntity<Member> createMember(@Valid @RequestBody Member member) {
         return ResponseEntity.ok(memberService.createMember(member));
     }
 
@@ -28,7 +29,7 @@ public class MemberController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Member> getMemberById(@PathVariable Long id) {
+    public ResponseEntity<Member> getMemberById(@Valid @PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
 }
