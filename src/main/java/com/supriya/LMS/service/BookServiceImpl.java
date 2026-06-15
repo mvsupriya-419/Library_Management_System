@@ -3,6 +3,7 @@ package com.supriya.LMS.service;
 import com.supriya.LMS.Entity.Book;
 import com.supriya.LMS.dto.BookDto;
 import com.supriya.LMS.exception.BookNotFoundException;
+import com.supriya.LMS.exception.DuplicateIsbnException;
 import com.supriya.LMS.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +50,20 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookDto createBook(BookDto dto) {
 
-        Book savedBook = bookRepository.save(mapToEntity(dto));
+        if (bookRepository.existsByIsbn(dto.getIsbn())) {
+            throw new DuplicateIsbnException(
+                    "ISBN already exists");
+        }
+
+        Book book = new Book();
+
+        book.setIsbn(dto.getIsbn());
+        book.setTitle(dto.getTitle());
+        book.setAuthor(dto.getAuthor());
+        book.setCategory(dto.getCategory());
+        book.setAvailableCopies(dto.getAvailableCopies());
+
+        Book savedBook = bookRepository.save(book);
 
         return mapToDto(savedBook);
     }

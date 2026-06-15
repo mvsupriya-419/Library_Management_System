@@ -1,6 +1,7 @@
 package com.supriya.LMS.controller;
 
 import com.supriya.LMS.dto.BookDto;
+import com.supriya.LMS.response.ApiResponse;
 import com.supriya.LMS.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,50 +19,44 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    // Create Book
     @PostMapping
-    public ResponseEntity<BookDto> createBook(
-            @Valid @RequestBody BookDto dto) {
-
-        return ResponseEntity.ok(
-                bookService.createBook(dto));
+    public ResponseEntity<ApiResponse<BookDto>> createBook(@Valid @RequestBody BookDto dto) {
+        return ResponseEntity.ok(new ApiResponse<>(
+                        "200",
+                        "Book Created Successfully",
+                        bookService.createBook(dto)));
     }
 
-    // Get All Books
     @GetMapping
-    public ResponseEntity<List<BookDto>> getAllBooks() {
-
-        return ResponseEntity.ok(
-                bookService.getAllBooks());
+    public ResponseEntity<ApiResponse<List<BookDto>>> getAllBooks() {
+        return ResponseEntity.ok(new ApiResponse<>(
+                        "200",
+                        "Books Retrieved Successfully",
+                        bookService.getAllBooks()));
     }
 
-    // Get Book By Id
     @GetMapping("/{id}")
-    public ResponseEntity<BookDto> getBookById(
-            @PathVariable Long id) {
-
-        return ResponseEntity.ok(
-                bookService.getBookById(id));
+    public ResponseEntity<ApiResponse<BookDto>> getBookById(@PathVariable Long id) {
+        return ResponseEntity.ok(new ApiResponse<>(
+                        "200",
+                        "Book Found",
+                        bookService.getBookById(id)));
     }
 
-    // Update Book
     @PutMapping("/{id}")
-    public ResponseEntity<BookDto> updateBook(
-            @PathVariable Long id,
-            @Valid @RequestBody BookDto dto) {
-
-        return ResponseEntity.ok(
-                bookService.updateBook(id, dto));
+    public ResponseEntity<ApiResponse<BookDto>> updateBook(@PathVariable Long id, @Valid @RequestBody BookDto dto) {
+        return ResponseEntity.ok(new ApiResponse<>(
+                        "200",
+                        "Book Updated Successfully",
+                        bookService.updateBook(id, dto)));
     }
 
-    // Delete Book
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteBook(
-            @PathVariable Long id) {
-
+    public ResponseEntity<ApiResponse<String>> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-
-        return ResponseEntity.ok(
-                "Book deleted successfully");
+        return ResponseEntity.ok(new ApiResponse<>(
+                        "200",
+                        "Book Deleted Successfully",
+                        null));
     }
 }

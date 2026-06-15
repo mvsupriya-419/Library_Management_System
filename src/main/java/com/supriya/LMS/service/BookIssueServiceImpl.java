@@ -4,7 +4,7 @@ import com.supriya.LMS.Entity.Book;
 import com.supriya.LMS.Entity.BookIssue;
 import com.supriya.LMS.Entity.Member;
 import com.supriya.LMS.dto.BookIssueDto;
-import com.supriya.LMS.exception.IssueRecordNotFoundException;
+import com.supriya.LMS.exception.*;
 import com.supriya.LMS.repository.BookIssueRepository;
 import com.supriya.LMS.repository.BookRepository;
 import com.supriya.LMS.repository.MemberRepository;
@@ -50,20 +50,20 @@ public class BookIssueServiceImpl implements BookIssueService {
             Long bookId,
             Long memberId) {
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book Not Found"));
+        Book book = bookRepository.findById(bookId).orElseThrow(() ->
+                new BookNotFoundException("Book Not Found"));
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member Not Found"));
+        Member member = memberRepository.findById(memberId).orElseThrow(() ->
+                        new MemberNotFoundException("Member Not Found"));
 
         if (book.getAvailableCopies() <= 0) {
-            throw new RuntimeException("Book Unavailable");
+            throw new BookUnavailableException("Book Unavailable");
         }
 
         long count = bookIssueRepository.countByMemberIdAndStatus(memberId, "ISSUED");
 
         if (count >= 3) {
-            throw new RuntimeException("Cannot issue more than 3 books");
+            throw new MaximumBookLimitExceededException("Cannot issue more than 3 books");
         }
 
         BookIssue issue = new BookIssue();
