@@ -1,19 +1,20 @@
 package com.supriya.LMS.service;
 
-import com.supriya.LMS.Entity.BookIssue;
+import com.supriya.LMS.dto.BookIssueDto;
 
 import java.util.List;
 
 public interface BookIssueService {
 
-    BookIssue issueBook(Long bookId, Long memberId);
+    BookIssueDto issueBook(Long bookId, Long memberId);
 
-    BookIssue getBookIssueById(Long id);
+    BookIssueDto getBookIssueById(Long id);
 
-    List<BookIssue> getAllIssuedBooks();
+    List<BookIssueDto> getAllIssuedBooks();
 
-    List<BookIssue> getActiveIssues();
+    List<BookIssueDto> getActiveIssues();
 
+    List<BookIssueDto> getMemberIssuedBooks(Long memberId);
 
-    BookIssue returnBook(Long issueId);
+    BookIssueDto returnBook(Long issueId);
 }

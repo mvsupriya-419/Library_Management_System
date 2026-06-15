@@ -3,6 +3,7 @@ package com.supriya.LMS.service;
 import com.supriya.LMS.Entity.Book;
 import com.supriya.LMS.Entity.BookIssue;
 import com.supriya.LMS.Entity.Member;
+import com.supriya.LMS.dto.BookIssueDto;
 import com.supriya.LMS.exception.IssueRecordNotFoundException;
 import com.supriya.LMS.repository.BookIssueRepository;
 import com.supriya.LMS.repository.BookRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookIssueServiceImpl implements BookIssueService {
@@ -19,31 +21,50 @@ public class BookIssueServiceImpl implements BookIssueService {
     private final BookRepository bookRepository;
     private final MemberRepository memberRepository;
 
-    public BookIssueServiceImpl(BookIssueRepository bookIssueRepository,
-                                BookRepository bookRepository,
-                                MemberRepository memberRepository) {
+    public BookIssueServiceImpl(
+            BookIssueRepository bookIssueRepository,
+            BookRepository bookRepository,
+            MemberRepository memberRepository) {
+
         this.bookIssueRepository = bookIssueRepository;
         this.bookRepository = bookRepository;
         this.memberRepository = memberRepository;
     }
 
+    private BookIssueDto mapToDto(BookIssue issue) {
+
+        BookIssueDto dto = new BookIssueDto();
+
+        dto.setId(issue.getId());
+        dto.setBookId(issue.getBook().getId());
+        dto.setMemberId(issue.getMember().getId());
+        dto.setIssueDate(issue.getIssueDate());
+        dto.setReturnDate(issue.getReturnDate());
+        dto.setStatus(issue.getStatus());
+
+        return dto;
+    }
+
     @Override
-    public BookIssue issueBook(Long bookId, Long memberId) {
+    public BookIssueDto issueBook(
+            Long bookId,
+            Long memberId) {
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() ->
-                        new RuntimeException("Book not found"));
+                .orElseThrow(() -> new RuntimeException("Book Not Found"));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() ->
-                        new RuntimeException("Member not found"));
+                .orElseThrow(() -> new RuntimeException("Member Not Found"));
 
         if (book.getAvailableCopies() <= 0) {
-            throw new RuntimeException("No copies available");
+            throw new RuntimeException("Book Unavailable");
         }
 
-        book.setAvailableCopies(book.getAvailableCopies() - 1);
-        bookRepository.save(book);
+        long count = bookIssueRepository.countByMemberIdAndStatus(memberId, "ISSUED");
+
+        if (count >= 3) {
+            throw new RuntimeException("Cannot issue more than 3 books");
+        }
 
         BookIssue issue = new BookIssue();
 
@@ -52,36 +73,59 @@ public class BookIssueServiceImpl implements BookIssueService {
         issue.setIssueDate(LocalDate.now());
         issue.setStatus("ISSUED");
 
-        return bookIssueRepository.save(issue);
+        book.setAvailableCopies(book.getAvailableCopies() - 1);
+        bookRepository.save(book);
+        BookIssue savedIssue = bookIssueRepository.save(issue);
+
+        return mapToDto(savedIssue);
     }
 
     @Override
-    public BookIssue getBookIssueById(Long id) {
+    public BookIssueDto getBookIssueById(Long id) {
 
-        return bookIssueRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("Issue record not found"));
+        BookIssue issue = bookIssueRepository.findById(id).orElseThrow(() ->
+                new IssueRecordNotFoundException("Issue Not Found"));
+        return mapToDto(issue);
     }
 
     @Override
-    public List<BookIssue> getAllIssuedBooks() {
-        return bookIssueRepository.findAll();
+    public List<BookIssueDto> getAllIssuedBooks() {
+
+        return bookIssueRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookIssue> getActiveIssues() {
+    public List<BookIssueDto> getActiveIssues() {
 
         return bookIssueRepository
-                .findByStatus("ISSUED");
+                .findByStatus("ISSUED")
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public BookIssue returnBook(Long issueId) {
+    public List<BookIssueDto> getMemberIssuedBooks(
+            Long memberId) {
+
+        return bookIssueRepository
+                .findByMemberId(memberId)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public BookIssueDto returnBook(Long issueId) {
 
         BookIssue issue = bookIssueRepository.findById(issueId).orElseThrow(() ->
                 new IssueRecordNotFoundException("Issue Not Found"));
 
-        if ("RETURNED".equalsIgnoreCase(issue.getStatus())) {
-            return issue;
+        if ("RETURNED".equals(issue.getStatus())) {
+            throw new RuntimeException("Book Already Returned");
         }
 
         issue.setStatus("RETURNED");
@@ -89,6 +133,6 @@ public class BookIssueServiceImpl implements BookIssueService {
         Book book = issue.getBook();
         book.setAvailableCopies(book.getAvailableCopies() + 1);
         bookRepository.save(book);
-        return bookIssueRepository.save(issue);
+        return mapToDto(bookIssueRepository.save(issue));
     }
 }

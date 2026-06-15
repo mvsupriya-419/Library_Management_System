@@ -1,54 +1,100 @@
 package com.supriya.LMS.service;
 
 import com.supriya.LMS.Entity.Member;
+import com.supriya.LMS.dto.MemberDto;
 import com.supriya.LMS.exception.MemberNotFoundException;
 import com.supriya.LMS.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
 
-    public MemberServiceImpl(MemberRepository memberRepository) {
+    public MemberServiceImpl(MemberRepository memberRepository)
+    {
         this.memberRepository = memberRepository;
     }
 
+    private MemberDto mapToDto(Member member) {
+
+        MemberDto dto = new MemberDto();
+
+        dto.setId(member.getId());
+        dto.setMemberCode(member.getMemberCode());
+        dto.setName(member.getName());
+        dto.setEmail(member.getEmail());
+        dto.setPhoneNumber(member.getPhoneNumber());
+
+        return dto;
+    }
+
+    private Member mapToEntity(MemberDto dto) {
+
+        Member member = new Member();
+
+        member.setId(dto.getId());
+        member.setMemberCode(dto.getMemberCode());
+        member.setName(dto.getName());
+        member.setEmail(dto.getEmail());
+        member.setPhoneNumber(dto.getPhoneNumber());
+
+        return member;
+    }
+
     @Override
-    public Member createMember(Member member) {
-        if(memberRepository.existsByMemberCode(member.getMemberCode())){
-            throw new RuntimeException("Member code already exists");
+    public MemberDto createMember(MemberDto dto) {
+
+        if (memberRepository.existsByEmail(dto.getEmail())) {
+            throw new RuntimeException("Email already exists");
         }
-        return memberRepository.save(member);
+
+        Member savedMember = memberRepository.save(mapToEntity(dto));
+        return mapToDto(savedMember);
     }
 
     @Override
-    public List<Member> getAllMembers() {
-        return memberRepository.findAll();
-    }
+    public MemberDto getMemberById(Long id) {
 
-    @Override
-    public Member getMemberById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Member not found with id: " + id));
-    }
-
-    @Override
-    public Member updateMember(Long id, Member member) {
-        Member existing = memberRepository.findById(id).orElseThrow(() ->
+        Member member = memberRepository.findById(id).orElseThrow(() ->
                 new MemberNotFoundException("Member Not Found"));
-        existing.setName(member.getName());
-        existing.setEmail(member.getEmail());
-        existing.setPhoneNumber(member.getPhoneNumber());
-        return memberRepository.save(existing);
+
+        return mapToDto(member);
+    }
+
+    @Override
+    public List<MemberDto> getAllMembers() {
+
+        return memberRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public MemberDto updateMember(Long id, MemberDto dto) {
+
+        Member existing = memberRepository.findById(id).orElseThrow(() ->
+                        new MemberNotFoundException("Member Not Found"));
+
+        existing.setMemberCode(dto.getMemberCode());
+        existing.setName(dto.getName());
+        existing.setEmail(dto.getEmail());
+        existing.setPhoneNumber(dto.getPhoneNumber());
+
+        Member updatedMember = memberRepository.save(existing);
+        return mapToDto(updatedMember);
     }
 
     @Override
     public void deleteMember(Long id) {
+
         Member member = memberRepository.findById(id).orElseThrow(() ->
                 new MemberNotFoundException("Member Not Found"));
+
         memberRepository.delete(member);
     }
 }
