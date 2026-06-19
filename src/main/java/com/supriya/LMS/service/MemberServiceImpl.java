@@ -9,6 +9,8 @@ import com.supriya.LMS.exception.MemberNotFoundException;
 import com.supriya.LMS.mapper.MemberMapper;
 import com.supriya.LMS.repository.MemberRepository;
 import com.supriya.LMS.repository.UsersRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,11 +22,13 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
     private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public MemberServiceImpl(MemberRepository memberRepository, MemberMapper memberMapper, UsersRepository usersRepository) {
+    public MemberServiceImpl(MemberRepository memberRepository, MemberMapper memberMapper, UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
         this.memberMapper = memberMapper;
         this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -33,10 +37,11 @@ public class MemberServiceImpl implements MemberService {
         if (memberRepository.existsByMemberCode(dto.getMemberCode())) {
             throw new DuplicateMemberCodeException("Member Code already exists");
         }
+        String getPass = generatePassword();
         Users users = Users.builder()
                 .email(dto.getEmail())
                 .role(Providers.USER)
-                .password(generatePassword())
+                .password(passwordEncoder.encode(getPass))
                 .build();
 
         usersRepository.save(users);
