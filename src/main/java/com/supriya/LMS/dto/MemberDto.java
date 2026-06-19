@@ -7,8 +7,6 @@ import lombok.Data;
 @Data
 public class MemberDto {
 
-    private Long id;
-
     private String memberCode;
 
     @NotBlank(message = "Name is required")

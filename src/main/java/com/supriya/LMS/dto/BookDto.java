@@ -7,8 +7,6 @@ import lombok.Data;
 @Data
 public class BookDto {
 
-    private Long id;
-
     @NotBlank(message = "ISBN cannot be empty")
     private String isbn;
 
@@ -21,4 +19,5 @@ public class BookDto {
 
     @Min(value = 1, message = "Available copies must be greater than 0")
     private Integer availableCopies;
+
 }
