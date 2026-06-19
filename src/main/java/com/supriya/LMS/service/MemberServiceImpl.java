@@ -1,11 +1,14 @@
 package com.supriya.LMS.service;
 
 import com.supriya.LMS.Entity.Member;
+import com.supriya.LMS.Entity.Providers;
+import com.supriya.LMS.Entity.Users;
 import com.supriya.LMS.dto.MemberDto;
 import com.supriya.LMS.exception.DuplicateMemberCodeException;
 import com.supriya.LMS.exception.MemberNotFoundException;
 import com.supriya.LMS.mapper.MemberMapper;
 import com.supriya.LMS.repository.MemberRepository;
+import com.supriya.LMS.repository.UsersRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +19,12 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
+    private final UsersRepository usersRepository;
 
-    public MemberServiceImpl(MemberRepository memberRepository, MemberMapper memberMapper) {
+    public MemberServiceImpl(MemberRepository memberRepository, MemberMapper memberMapper, UsersRepository usersRepository) {
         this.memberRepository = memberRepository;
         this.memberMapper = memberMapper;
+        this.usersRepository = usersRepository;
     }
 
 
@@ -28,8 +33,14 @@ public class MemberServiceImpl implements MemberService {
         if (memberRepository.existsByMemberCode(dto.getMemberCode())) {
             throw new DuplicateMemberCodeException("Member Code already exists");
         }
+        Users users = Users.builder()
+                .email(dto.getEmail())
+                .role(Providers.USER)
+                .password(generatePassword())
+                .build();
+
+        usersRepository.save(users);
         Member member = memberMapper.toEntity(dto);
-        member.setId(null);
         return memberMapper.toDto(memberRepository.save(member));
     }
 
@@ -64,5 +75,10 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberNotFoundException("Member Not Found"));
         memberRepository.delete(member);
+    }
+
+    public String generatePassword()
+    {
+        return "Zkteco@123";
     }
 }

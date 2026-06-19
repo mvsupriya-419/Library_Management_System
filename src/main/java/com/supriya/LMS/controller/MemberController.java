@@ -5,6 +5,7 @@ import com.supriya.LMS.response.ApiResponse;
 import com.supriya.LMS.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class MemberController {
 
     // Create Member
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MemberDto>> createMember(@Valid @RequestBody MemberDto dto)
     {
         MemberDto savedMember = memberService.createMember(dto);
