@@ -8,25 +8,18 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class JwtService {
 
     private static final String SECRET = "8fK29xLmQp7VnR4sYtU1wE6zBcD9hJmN2aX5cV8qLpR3tYuI";
 
-    public String generateToken(UserDetails userDetails)
-    {
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
+    public String generateToken(String email) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 300))
-                .signWith(getSignedKey(), SignatureAlgorithm.HS256)  // MATH...
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .signWith(getSignedKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 

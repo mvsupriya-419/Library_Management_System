@@ -1,7 +1,6 @@
 package com.supriya.LMS.Entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,9 +32,13 @@ public class Users implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Providers role;
 
+    @Column(nullable = false)
+    private boolean enabled = true;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+        return List.of(
+                new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
     @Override
@@ -43,4 +46,8 @@ public class Users implements UserDetails {
         return this.email;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
+    }
 }
