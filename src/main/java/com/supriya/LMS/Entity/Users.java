@@ -42,4 +42,5 @@ public class Users implements UserDetails {
     public String getUsername() {
         return this.email;
     }
+
 }
