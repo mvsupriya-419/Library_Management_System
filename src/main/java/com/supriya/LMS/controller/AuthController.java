@@ -47,12 +47,11 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(requestDTO.getEmail(), requestDTO.getPassword())
         );
 
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(requestDTO.getEmail());
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return jwtService.generateToken(userDetails);
     }
 
     @PostMapping("/change-password")
-    @PreAuthorize("hasRole('ADMIN')")
     public String changePassword(
             @RequestBody ChangePasswordDto changePasswordDto ,
             Principal principal) {
@@ -64,7 +63,7 @@ public class AuthController {
         {
             throw new RuntimeException("PASSWORD IS NOT MATCHED.");
         }
-        users.setPassword(changePasswordDto.getNewPassword());
+        users.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
         usersRepository.save(users);
         return "SUCCESSFULLY CHANE THE PASSWROD";
     }

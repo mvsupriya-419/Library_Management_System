@@ -37,7 +37,9 @@ public class MemberServiceImpl implements MemberService {
         if (memberRepository.existsByMemberCode(dto.getMemberCode())) {
             throw new DuplicateMemberCodeException("Member Code already exists");
         }
+
         String getPass = generatePassword();
+
         Users users = Users.builder()
                 .email(dto.getEmail())
                 .role(Providers.USER)
@@ -45,8 +47,11 @@ public class MemberServiceImpl implements MemberService {
                 .build();
 
         usersRepository.save(users);
+
         Member member = memberMapper.toEntity(dto);
-        return memberMapper.toDto(memberRepository.save(member));
+        MemberDto result = memberMapper.toDto(memberRepository.save(member));
+        result.setGeneratedPassword(getPass);   // ← carry the plain-text password out
+        return result;
     }
 
     @Override

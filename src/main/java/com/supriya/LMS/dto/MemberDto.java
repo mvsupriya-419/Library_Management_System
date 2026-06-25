@@ -16,4 +16,6 @@ public class MemberDto {
     private String email;
 
     private String phoneNumber;
+
+    private String generatedPassword;
 }
