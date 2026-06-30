@@ -2,9 +2,7 @@ package com.supriya.LMS.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 
@@ -13,13 +11,11 @@ import java.time.Instant;
 @AllArgsConstructor
 public class UserRequestDto{
 
-    private String name;
     private String email;
+    private String password;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Instant createdAt;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Instant updatedAt;
 
 
 }

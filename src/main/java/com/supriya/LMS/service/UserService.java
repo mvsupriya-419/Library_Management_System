@@ -6,18 +6,21 @@ import com.supriya.LMS.events.*;
 import com.supriya.LMS.model.User;
 import com.supriya.LMS.repository.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
 
+    private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
 
     private final ApplicationEventPublisher publisher;
 
-    public UserService(ApplicationEventPublisher publisher,
+    public UserService(PasswordEncoder passwordEncoder, ApplicationEventPublisher publisher,
                        UserRepository userRepository) {
+        this.passwordEncoder = passwordEncoder;
 
         this.publisher = publisher;
         this.userRepository = userRepository;
@@ -25,14 +28,15 @@ public class UserService {
 
     public void registerUser(UserRequestDto request) {
 
-        User user = new User(request.getName(), request.getEmail());
+        User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()));
+
         userRepository.save(user);
         System.out.println("User saved to database");
         publisher.publishEvent(new UserRegisteredEvent(user));
     }
 
     public void updateUser(UserRequestDto request) {
-        User user = new User(request.getName(), request.getEmail());
+        User user = new User(request.getEmail(), request.getPassword());
         userRepository.save(user);
         System.out.println("User updated");
         publisher.publishEvent(new UserUpdatedEvent(user));
@@ -47,22 +51,16 @@ public class UserService {
 
     public void loginUser(UserRequestDto request) {
 
-        String name = request.getName();
         String email = request.getEmail();
+        String password = request.getPassword();
 
-        User userByName = userRepository.findByName(name);
+        User userByPassword = userRepository.findByPassword(password);
         User userByEmail = userRepository.findByEmail(email);
 
-        if (userByName != null && userByEmail != null) {
-
+        if (userByPassword != null && userByEmail != null) {
             System.out.println("User logged in");
-
-            publisher.publishEvent(
-                    new UserLoggedInEvent(userByName)
-            );
-
+            publisher.publishEvent(new UserLoggedInEvent(userByPassword));
         } else {
-
             throw new RuntimeException("User not found");
         }
     }
@@ -74,7 +72,7 @@ public class UserService {
     }
 
     public void expireMembership(UserRequestDto request) {
-        User user = new User(request.getName(), request.getEmail());
+        User user = new User(request.getEmail(), request.getPassword());
         System.out.println("Membership expired");
         publisher.publishEvent(new MembershipExpiredEvent(user));
     }

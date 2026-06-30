@@ -15,18 +15,18 @@ import java.time.Instant;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
     private String email;
 
     private Instant userCreatedDate;
-    private Instant userUpdateDate;
+
+    public User(Long id, String name, String email) {
+    }
 
     public User(String name, String email) {
-        this.name = name;
-        this.email = email;
     }
 
     @PrePersist
@@ -34,12 +34,5 @@ public class User {
     {
         this.userCreatedDate = Instant.now();
     }
-
-    @PreUpdate
-    protected void onUpdate()
-    {
-        this.userUpdateDate = Instant.now();
-    }
-
 
 }

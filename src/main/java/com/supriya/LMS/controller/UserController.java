@@ -49,5 +49,6 @@ public class UserController {
     public String expire(@RequestBody UserRequestDto request) {
         userService.expireMembership(request);
         return "Membership expired";
+
     }
 }
