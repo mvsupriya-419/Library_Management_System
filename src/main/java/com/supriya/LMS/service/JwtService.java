@@ -23,10 +23,11 @@ public class JwtService {
 
     public String generateToken(Map<String, Object> claims,  UserDetails userDetails) {
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 300))
-                .signWith(getSignedKey(), SignatureAlgorithm.HS256)  // MATH...
+                .signWith(getSignedKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 

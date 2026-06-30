@@ -1,6 +1,7 @@
 package com.supriya.LMS.controller;
 import com.supriya.LMS.Entity.Users;
 import com.supriya.LMS.dto.AuthRequestDTO;
+import com.supriya.LMS.dto.AuthResponseDto;
 import com.supriya.LMS.dto.ChangePasswordDto;
 import com.supriya.LMS.repository.UsersRepository;
 import com.supriya.LMS.service.CustomUserDetailsService;
@@ -9,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -41,14 +43,26 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody AuthRequestDTO requestDTO) {
+    public AuthResponseDto login(@RequestBody AuthRequestDTO requestDTO) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(requestDTO.getEmail(), requestDTO.getPassword())
         );
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return jwtService.generateToken(userDetails);
+
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse("USER")
+                .replace("ROLE_", "");
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
+
+        String token = jwtService.generateToken(claims, userDetails);
+
+        return new AuthResponseDto(token, userDetails.getUsername(), role);
     }
 
     @PostMapping("/change-password")
@@ -65,6 +79,6 @@ public class AuthController {
         }
         users.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
         usersRepository.save(users);
-        return "SUCCESSFULLY CHANE THE PASSWROD";
+        return "Password changed successfully";
     }
 }
